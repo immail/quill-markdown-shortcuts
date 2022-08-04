@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("quill"));
+		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(["quill"], factory);
+		define([], factory);
 	else if(typeof exports === 'object')
-		exports["MarkdownShortcuts"] = factory(require("quill"));
+		exports["MarkdownShortcuts"] = factory();
 	else
-		root["MarkdownShortcuts"] = factory(root["quill"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__) {
+		root["MarkdownShortcuts"] = factory();
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -70,17 +70,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -88,48 +82,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // Quill.js Plugin - Markdown Shortcuts
-// This is a module for the Quill.js WYSIWYG editor (https://quilljs.com/)
-// which converts text entered as markdown to rich text.
-//
-// v0.0.5
-//
-// Author: Patrick Lee (me@patricklee.nyc)
-//
-// (c) Copyright 2017 Patrick Lee (me@patricklee.nyc).
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-
-var _quill = __webpack_require__(0);
-
-var _quill2 = _interopRequireDefault(_quill);
-
-var _hr = __webpack_require__(2);
-
-var _hr2 = _interopRequireDefault(_hr);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-_quill2.default.register('formats/horizontal', _hr2.default);
+// Quill.js Plugin - Markdown Shortcuts
 
 var MarkdownShortcuts = function () {
   function MarkdownShortcuts(quill, options) {
@@ -141,42 +100,27 @@ var MarkdownShortcuts = function () {
     this.options = options;
 
     this.ignoreTags = ['PRE'];
-    this.matches = [{
-      name: 'header',
-      pattern: /^(#){1,6}\s/g,
-      action: function action(text, selection, pattern) {
+    this.shortMatches = [{
+      name: 'short_bold',
+      pattern: /(?:\*){1}(.+?)(?:\*){1}/g,
+      action: function action(text, selection, pattern, lineStart) {
         var match = pattern.exec(text);
-        if (!match) return;
-        var size = match[0].length;
-        // Need to defer this action https://github.com/quilljs/quill/issues/1134
+
+        var annotatedText = match[0];
+        var matchedText = match[1];
+        var startIndex = lineStart + match.index;
+
+        if (text.match(/^([*_ \n]+)$/g)) return;
+        console.log('shortBold:', { annotatedText: annotatedText, matchedText: matchedText, startIndex: startIndex });
         setTimeout(function () {
-          _this.quill.formatLine(selection.index, 0, 'header', size - 1);
-          _this.quill.deleteText(selection.index - size, size);
+          _this.quill.deleteText(startIndex, annotatedText.length);
+          _this.quill.insertText(startIndex, matchedText, { bold: true });
+          _this.quill.format('bold', false);
         }, 0);
       }
     }, {
-      name: 'blockquote',
-      pattern: /^(>)\s/g,
-      action: function action(text, selection) {
-        // Need to defer this action https://github.com/quilljs/quill/issues/1134
-        setTimeout(function () {
-          _this.quill.formatLine(selection.index, 1, 'blockquote', true);
-          _this.quill.deleteText(selection.index - 2, 2);
-        }, 0);
-      }
-    }, {
-      name: 'code-block',
-      pattern: /^`{3}(?:\s|\n)/g,
-      action: function action(text, selection) {
-        // Need to defer this action https://github.com/quilljs/quill/issues/1134
-        setTimeout(function () {
-          _this.quill.formatLine(selection.index, 1, 'code-block', true);
-          _this.quill.deleteText(selection.index - 4, 4);
-        }, 0);
-      }
-    }, {
-      name: 'bolditalic',
-      pattern: /(?:\*|_){3}(.+?)(?:\*|_){3}/g,
+      name: 'short_italic',
+      pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/g,
       action: function action(text, selection, pattern, lineStart) {
         var match = pattern.exec(text);
 
@@ -188,13 +132,35 @@ var MarkdownShortcuts = function () {
 
         setTimeout(function () {
           _this.quill.deleteText(startIndex, annotatedText.length);
-          _this.quill.insertText(startIndex, matchedText, { bold: true, italic: true });
-          _this.quill.format('bold', false);
+          _this.quill.insertText(startIndex, matchedText, { italic: true });
+          _this.quill.format('italic', false);
         }, 0);
       }
     }, {
+      name: 'short_strikethrough',
+      pattern: /(?:~)(.+?)(?:~)/g,
+      action: function action(text, selection, pattern, lineStart) {
+        var match = pattern.exec(text);
+
+        var annotatedText = match[0];
+        var matchedText = match[1];
+        var startIndex = lineStart + match.index;
+
+        if (text.match(/^([*_ \n]+)$/g)) return;
+
+        setTimeout(function () {
+          _this.quill.deleteText(startIndex, annotatedText.length);
+          _this.quill.insertText(startIndex, matchedText, { strike: true });
+          _this.quill.format('strike', false);
+        }, 0);
+      }
+    }];
+
+    this.moreMatches = this.withShortMatches ? [].concat(_toConsumableArray(this.shortMatches)) : [];
+
+    this.matches = [{
       name: 'bold',
-      pattern: /(?:\*|_){2}(.+?)(?:\*|_){2}/g,
+      pattern: /(?:\*){2}(.+?)(?:\*){2}/g,
       action: function action(text, selection, pattern, lineStart) {
         var match = pattern.exec(text);
 
@@ -212,7 +178,7 @@ var MarkdownShortcuts = function () {
       }
     }, {
       name: 'italic',
-      pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/g,
+      pattern: /(?:\*|_){2}(.+?)(?:\*|_){2}/g,
       action: function action(text, selection, pattern, lineStart) {
         var match = pattern.exec(text);
 
@@ -247,6 +213,16 @@ var MarkdownShortcuts = function () {
         }, 0);
       }
     }, {
+      name: 'code-block',
+      pattern: /^`{3}(?:\s|\n)/g,
+      action: function action(text, selection) {
+        // Need to defer this action https://github.com/quilljs/quill/issues/1134
+        setTimeout(function () {
+          _this.quill.formatLine(selection.index, 1, 'code-block', true);
+          _this.quill.deleteText(selection.index - 4, 4);
+        }, 0);
+      }
+    }, {
       name: 'code',
       pattern: /(?:`)(.+?)(?:`)/g,
       action: function action(text, selection, pattern, lineStart) {
@@ -266,19 +242,6 @@ var MarkdownShortcuts = function () {
         }, 0);
       }
     }, {
-      name: 'hr',
-      pattern: /^([-*]\s?){3}/g,
-      action: function action(text, selection) {
-        var startIndex = selection.index - text.length;
-        setTimeout(function () {
-          _this.quill.deleteText(startIndex, text.length);
-
-          _this.quill.insertEmbed(startIndex + 1, 'hr', true, _quill2.default.sources.USER);
-          _this.quill.insertText(startIndex + 2, "\n", _quill2.default.sources.SILENT);
-          _this.quill.setSelection(startIndex + 2, _quill2.default.sources.SILENT);
-        }, 0);
-      }
-    }, {
       name: 'plus-ul',
       // Quill 1.3.5 already treat * as another trigger for bullet lists
       pattern: /^\+\s$/g,
@@ -287,22 +250,6 @@ var MarkdownShortcuts = function () {
           _this.quill.formatLine(selection.index, 1, 'list', 'unordered');
           _this.quill.deleteText(selection.index - 2, 2);
         }, 0);
-      }
-    }, {
-      name: 'image',
-      pattern: /(?:!\[(.+?)\])(?:\((.+?)\))/g,
-      action: function action(text, selection, pattern) {
-        var startIndex = text.search(pattern);
-        var matchedText = text.match(pattern)[0];
-        // const hrefText = text.match(/(?:!\[(.*?)\])/g)[0]
-        var hrefLink = text.match(/(?:\((.*?)\))/g)[0];
-        var start = selection.index - matchedText.length - 1;
-        if (startIndex !== -1) {
-          setTimeout(function () {
-            _this.quill.deleteText(start, matchedText.length);
-            _this.quill.insertEmbed(start, 'image', hrefLink.slice(1, hrefLink.length - 1));
-          }, 0);
-        }
       }
     }, {
       name: 'link',
@@ -320,13 +267,14 @@ var MarkdownShortcuts = function () {
           }, 0);
         }
       }
-    }];
+    }].concat(_toConsumableArray(this.shortMatches));
 
     // Handler that looks for insert deltas that match specific characters
     this.quill.on('text-change', function (delta, oldContents, source) {
+
       for (var i = 0; i < delta.ops.length; i++) {
         if (delta.ops[i].hasOwnProperty('insert')) {
-          if (delta.ops[i].insert === ' ') {
+          if ([' ', '*', '~', '_'].includes(delta.ops[i].insert)) {
             _this.onSpace();
           } else if (delta.ops[i].insert === '\n') {
             _this.onEnter();
@@ -354,6 +302,7 @@ var MarkdownShortcuts = function () {
 
       var text = line.domNode.textContent;
       var lineStart = selection.index - offset;
+      console.log({ selection: selection, line: line, lineStart: lineStart });
       if (this.isValid(text, line.domNode.tagName)) {
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
@@ -441,48 +390,6 @@ if (window.Quill) {
 }
 
 module.exports = MarkdownShortcuts;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _quill = __webpack_require__(0);
-
-var _quill2 = _interopRequireDefault(_quill);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var BlockEmbed = _quill2.default.import('blots/block/embed');
-
-var HorizontalRule = function (_BlockEmbed) {
-  _inherits(HorizontalRule, _BlockEmbed);
-
-  function HorizontalRule() {
-    _classCallCheck(this, HorizontalRule);
-
-    return _possibleConstructorReturn(this, (HorizontalRule.__proto__ || Object.getPrototypeOf(HorizontalRule)).apply(this, arguments));
-  }
-
-  return HorizontalRule;
-}(BlockEmbed);
-
-HorizontalRule.blotName = 'hr';
-HorizontalRule.tagName = 'hr';
-
-exports.default = HorizontalRule;
 
 /***/ })
 /******/ ]);

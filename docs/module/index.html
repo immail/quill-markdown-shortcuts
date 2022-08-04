@@ -5,11 +5,13 @@
   <meta charset="UTF-8">
   <title>Quill Markdown Shortcuts</title>
   <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+  <link href="https://cdn.quilljs.com/1.3.7/quill.bubble.css" rel="stylesheet">
   <style>
     body {
       display: flex;
       justify-content: center;
       align-items: center;
+      background-color: rgba(53, 159, 178, 0.307);
     }
 
     pre {
@@ -36,12 +38,53 @@
     }
 
     .editor-wrapper {
-      flex-grow: 3;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
     }
 
-    .ql-editor {
-      height: 100%;
+    .ql-toolbar,
+    .ql-container {
+      border: 0px !important;
     }
+
+    .ql-toolbar {
+      padding: 0px !important;
+      margin: 0px;
+      height: 22px;
+      font-size: small;
+    }
+
+    .ql-container {
+      border: 0px !important;
+      border-radius: 10px !important;
+      background-color: white;
+    }
+
+    .ql-snow.ql-toolbar button svg {
+      height: 80%;
+    }
+
+
+    .ql-editor {
+      max-height: 100px;
+      min-height: 22px;
+      overflow-y: auto;
+      overflow-x: none;
+      width: 100%;
+      line-height: 16px;
+      white-space: pre-wrap;
+      font-size: 0.95em;
+    }
+
+    /* .ql-container {
+      border: 0px !important;
+      border-radius: 20px !important;
+      background: white;
+      margin: 10px;
+      margin-left: 50px;
+      padding: 6px 4px;
+    } */
 
     .title {
       text-align: center;
@@ -66,7 +109,7 @@
         <div id="editor"></div>
       </div>
 
-      <div class="cheat-sheet">
+      <div class="cheat-sheet" style="display: none;">
         <p>
           <strong>Supported markdown:</strong>
         </p>
