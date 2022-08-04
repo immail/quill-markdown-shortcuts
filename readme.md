@@ -2,7 +2,12 @@
 
 This package is a [Quill.js](https://quilljs.com) module that converts markdown on the fly to formatted rich text.
 
-[Example](https://patleeman.github.io/quill-markdown-shortcuts/)
+[Example](https://github.com/rogeriomq/quill-markdown-shortcuts/)
+
+## News
+ - Added short formatting, like a slack input. Use prop `withShortMatches` when apply plugin.
+ - Modify triggers for apply formatting.
+    Before it was just SPACE and ENTER, now is `*`,`~`,`_`, SPACE and ENTER.
 
 # Quickstart
 
@@ -45,7 +50,10 @@ const quill = new Quill('#editor', {
   // empty object.
   // There are currently no options to set.
   modules: {
-    markdownShortcuts: {}
+    markdownShortcuts: {
+      // Use only one * or ~ or _ for aplly formart.
+      withShortMatches: true, // optional
+    }
   }
 });
 ```
@@ -65,7 +73,10 @@ const quill = new Quill('#editor', {
         // empty object.
         // There are currently no options to set.
         modules: {
-          markdownShortcuts: {}
+          markdownShortcuts: {
+            // Use only one * or ~ or _ for aplly formart.
+            withShortMatches: true, // optional
+          }
         }
       });
     </script>
