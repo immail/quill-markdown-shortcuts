@@ -27,8 +27,12 @@
  // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  // THE SOFTWARE.
  //
+
+
+ const emojiRegex = require('emoji-regex');
 class MarkdownShortcuts {
   constructor (quill, options) {
+    this.regexEmojis = emojiRegex()
     this.quill = quill
     this.options = options
 
@@ -37,13 +41,13 @@ class MarkdownShortcuts {
       {
         name: 'short_bold',
         pattern: /(?:\*){1}(.+?)(?:\*){1}/g,
-        action: (text, selection, pattern, lineStart) => {
+        action: (text, selection, pattern, lineStart, emojisLength = 0) => {
           let match = pattern.exec(text)
-
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index
-
+          const startIndex = lineStart + match.index - emojisLength
+          console.log('short_bold:',
+            `text: ${text}, annotatedText: ${annotatedText}, matchedText: ${matchedText}, startIndex: ${startIndex}, matchIndex: ${match.index}`)
           if (text.match(/^([*_ \n]+)$/g)) return
           setTimeout(() => {
             this.quill.deleteText(startIndex, annotatedText.length)
@@ -55,12 +59,12 @@ class MarkdownShortcuts {
       {
         name: 'short_italic',
         pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/g,
-        action: (text, selection, pattern, lineStart) => {
+        action: (text, selection, pattern, lineStart, emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index
+          const startIndex = lineStart + match.index - emojisLength
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -74,12 +78,12 @@ class MarkdownShortcuts {
       {
         name: 'short_strikethrough',
         pattern: /(?:~)(.+?)(?:~)/g,
-        action: (text, selection, pattern, lineStart) => {
+        action: (text, selection, pattern, lineStart, emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index
+          const startIndex = lineStart + match.index - emojisLength
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -92,18 +96,18 @@ class MarkdownShortcuts {
       },
     ]
 
-    this.moreMatches = this.withShortMatches ? [...this.shortMatches] : []
+    this.moreMatches = this.options.withShortMatches ? [...this.shortMatches] : []
 
     this.matches = [
       {
         name: 'bold',
         pattern: /(?:\*){2}(.+?)(?:\*){2}/g,
-        action: (text, selection, pattern, lineStart) => {
+        action: (text, selection, pattern, lineStart,  emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index
+          const startIndex = lineStart + match.index - emojisLength
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -117,12 +121,12 @@ class MarkdownShortcuts {
       {
         name: 'italic',
         pattern: /(?:\*|_){2}(.+?)(?:\*|_){2}/g,
-        action: (text, selection, pattern, lineStart) => {
+        action: (text, selection, pattern, lineStart,  emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index
+          const startIndex = lineStart + match.index - emojisLength
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -136,12 +140,12 @@ class MarkdownShortcuts {
       {
         name: 'strikethrough',
         pattern: /(?:~~)(.+?)(?:~~)/g,
-        action: (text, selection, pattern, lineStart) => {
+        action: (text, selection, pattern, lineStart,  emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index
+          const startIndex = lineStart + match.index - emojisLength
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -166,12 +170,12 @@ class MarkdownShortcuts {
       {
         name: 'code',
         pattern: /(?:`)(.+?)(?:`)/g,
-        action: (text, selection, pattern, lineStart) => {
+        action: (text, selection, pattern, lineStart,  emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index
+          const startIndex = lineStart + match.index - emojisLength
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -211,7 +215,7 @@ class MarkdownShortcuts {
           }
         }
       },
-      ...this.shortMatches
+      ...this.moreMatches
     ]
 
     // Handler that looks for insert deltas that match specific characters
@@ -246,8 +250,9 @@ class MarkdownShortcuts {
       for (let match of this.matches) {
         const matchedText = text.match(match.pattern)
         if (matchedText) {
+          const emojisFound = text.match(this.regexEmojis);
           // We need to replace only matched text not the whole line
-          match.action(text, selection, match.pattern, lineStart)
+          match.action(text, selection, match.pattern, lineStart, emojisFound.length)
           return
         }
       }
