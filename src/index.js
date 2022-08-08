@@ -46,8 +46,8 @@ class MarkdownShortcuts {
           const annotatedText = match[0]
           const matchedText = match[1]
           const startIndex = lineStart + match.index - emojisLength
-          console.log('short_bold:',
-            `text: ${text}, annotatedText: ${annotatedText}, matchedText: ${matchedText}, startIndex: ${startIndex}, matchIndex: ${match.index}`)
+          // console.log('short_bold:',
+          //   `text: ${text}, annotatedText: ${annotatedText}, matchedText: ${matchedText}, startIndex: ${startIndex}, matchIndex: ${match.index}`)
           if (text.match(/^([*_ \n]+)$/g)) return
           setTimeout(() => {
             this.quill.deleteText(startIndex, annotatedText.length)

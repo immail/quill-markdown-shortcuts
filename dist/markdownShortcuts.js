@@ -136,13 +136,14 @@ var MarkdownShortcuts = function () {
       name: 'short_bold',
       pattern: /(?:\*){1}(.+?)(?:\*){1}/g,
       action: function action(text, selection, pattern, lineStart) {
-        var emojisFound = text.match(_this.regexEmojis);
-        console.log('emojisFound:', emojisFound);
+        var emojisLength = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
         var match = pattern.exec(text);
         var annotatedText = match[0];
         var matchedText = match[1];
-        var startIndex = lineStart + match.index - emojisFound.length * 3;
-        console.log('short_bold:', 'text: ' + text + ', annotatedText: ' + annotatedText + ', matchedText: ' + matchedText + ', startIndex: ' + startIndex + ', matchIndex: ' + match.index);
+        var startIndex = lineStart + match.index - emojisLength;
+        // console.log('short_bold:',
+        //   `text: ${text}, annotatedText: ${annotatedText}, matchedText: ${matchedText}, startIndex: ${startIndex}, matchIndex: ${match.index}`)
         if (text.match(/^([*_ \n]+)$/g)) return;
         setTimeout(function () {
           _this.quill.deleteText(startIndex, annotatedText.length);
@@ -154,11 +155,13 @@ var MarkdownShortcuts = function () {
       name: 'short_italic',
       pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/g,
       action: function action(text, selection, pattern, lineStart) {
+        var emojisLength = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
         var match = pattern.exec(text);
 
         var annotatedText = match[0];
         var matchedText = match[1];
-        var startIndex = lineStart + match.index;
+        var startIndex = lineStart + match.index - emojisLength;
 
         if (text.match(/^([*_ \n]+)$/g)) return;
 
@@ -172,11 +175,13 @@ var MarkdownShortcuts = function () {
       name: 'short_strikethrough',
       pattern: /(?:~)(.+?)(?:~)/g,
       action: function action(text, selection, pattern, lineStart) {
+        var emojisLength = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
         var match = pattern.exec(text);
 
         var annotatedText = match[0];
         var matchedText = match[1];
-        var startIndex = lineStart + match.index;
+        var startIndex = lineStart + match.index - emojisLength;
 
         if (text.match(/^([*_ \n]+)$/g)) return;
 
@@ -194,11 +199,13 @@ var MarkdownShortcuts = function () {
       name: 'bold',
       pattern: /(?:\*){2}(.+?)(?:\*){2}/g,
       action: function action(text, selection, pattern, lineStart) {
+        var emojisLength = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
         var match = pattern.exec(text);
 
         var annotatedText = match[0];
         var matchedText = match[1];
-        var startIndex = lineStart + match.index;
+        var startIndex = lineStart + match.index - emojisLength;
 
         if (text.match(/^([*_ \n]+)$/g)) return;
 
@@ -212,11 +219,13 @@ var MarkdownShortcuts = function () {
       name: 'italic',
       pattern: /(?:\*|_){2}(.+?)(?:\*|_){2}/g,
       action: function action(text, selection, pattern, lineStart) {
+        var emojisLength = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
         var match = pattern.exec(text);
 
         var annotatedText = match[0];
         var matchedText = match[1];
-        var startIndex = lineStart + match.index;
+        var startIndex = lineStart + match.index - emojisLength;
 
         if (text.match(/^([*_ \n]+)$/g)) return;
 
@@ -230,11 +239,13 @@ var MarkdownShortcuts = function () {
       name: 'strikethrough',
       pattern: /(?:~~)(.+?)(?:~~)/g,
       action: function action(text, selection, pattern, lineStart) {
+        var emojisLength = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
         var match = pattern.exec(text);
 
         var annotatedText = match[0];
         var matchedText = match[1];
-        var startIndex = lineStart + match.index;
+        var startIndex = lineStart + match.index - emojisLength;
 
         if (text.match(/^([*_ \n]+)$/g)) return;
 
@@ -258,11 +269,13 @@ var MarkdownShortcuts = function () {
       name: 'code',
       pattern: /(?:`)(.+?)(?:`)/g,
       action: function action(text, selection, pattern, lineStart) {
+        var emojisLength = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
         var match = pattern.exec(text);
 
         var annotatedText = match[0];
         var matchedText = match[1];
-        var startIndex = lineStart + match.index;
+        var startIndex = lineStart + match.index - emojisLength;
 
         if (text.match(/^([*_ \n]+)$/g)) return;
 
@@ -344,8 +357,9 @@ var MarkdownShortcuts = function () {
 
             var matchedText = text.match(match.pattern);
             if (matchedText) {
+              var emojisFound = text.match(this.regexEmojis);
               // We need to replace only matched text not the whole line
-              match.action(text, selection, match.pattern, lineStart);
+              match.action(text, selection, match.pattern, lineStart, emojisFound.length);
               return;
             }
           }
