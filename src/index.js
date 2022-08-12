@@ -27,28 +27,22 @@
  // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  // THE SOFTWARE.
  //
-
-
- const emojiRegex = require('emoji-regex');
-class MarkdownShortcuts {
+ class MarkdownShortcuts {
   constructor (quill, options) {
-    this.regexEmojis = emojiRegex()
     this.quill = quill
     this.options = options
-
     this.ignoreTags = ['PRE']
     this.shortMatches = [
       {
         name: 'short_bold',
-        pattern: /(?:\*){1}(.+?)(?:\*){1}/g,
+        pattern: /(?:\*){1}(.+?)(?:\*){1}/gu,
         action: (text, selection, pattern, lineStart, emojisLength = 0) => {
           let match = pattern.exec(text)
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index - emojisLength
-          // console.log('short_bold:',
-          //   `text: ${text}, annotatedText: ${annotatedText}, matchedText: ${matchedText}, startIndex: ${startIndex}, matchIndex: ${match.index}`)
-          if (text.match(/^([*_ \n]+)$/g)) return
+          const startIndex = lineStart + match.index - (emojisLength * 3)
+          // console.log('short_bold::', `text: ${text}, annotatedText: ${annotatedText}, matchedText: ${matchedText}, startIndex: ${startIndex}, matchIndex: ${match.index}, emojisLength: ${emojisLength}`)
+          if (text.match(/^([*_ \n]+)$/gu)) return
           setTimeout(() => {
             this.quill.deleteText(startIndex, annotatedText.length)
             this.quill.insertText(startIndex, matchedText, {bold: true})
@@ -64,7 +58,7 @@ class MarkdownShortcuts {
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index - emojisLength
+          const startIndex = lineStart + match.index - (emojisLength * 3)
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -83,7 +77,7 @@ class MarkdownShortcuts {
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index - emojisLength
+          const startIndex = lineStart + match.index - (emojisLength * 3)
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -99,15 +93,16 @@ class MarkdownShortcuts {
     this.moreMatches = this.options.withShortMatches ? [...this.shortMatches] : []
 
     this.matches = [
+      ...this.moreMatches,
       {
         name: 'bold',
-        pattern: /(?:\*){2}(.+?)(?:\*){2}/g,
+        pattern: /(?:\*|_){2}(.+?)(?:\*|_){2}/g,
         action: (text, selection, pattern, lineStart,  emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index - emojisLength
+          const startIndex = lineStart + match.index - (emojisLength * 3)
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -120,13 +115,13 @@ class MarkdownShortcuts {
       },
       {
         name: 'italic',
-        pattern: /(?:\*|_){2}(.+?)(?:\*|_){2}/g,
+        pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/g,
         action: (text, selection, pattern, lineStart,  emojisLength = 0) => {
           let match = pattern.exec(text)
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index - emojisLength
+          const startIndex = lineStart + match.index - (emojisLength * 3)
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -145,7 +140,7 @@ class MarkdownShortcuts {
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index - emojisLength
+          const startIndex = lineStart + match.index - (emojisLength * 3)
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -175,7 +170,7 @@ class MarkdownShortcuts {
 
           const annotatedText = match[0]
           const matchedText = match[1]
-          const startIndex = lineStart + match.index - emojisLength
+          const startIndex = lineStart + match.index - (emojisLength * 3)
 
           if (text.match(/^([*_ \n]+)$/g)) return
 
@@ -214,8 +209,7 @@ class MarkdownShortcuts {
             }, 0)
           }
         }
-      },
-      ...this.moreMatches
+      }
     ]
 
     // Handler that looks for insert deltas that match specific characters
@@ -226,6 +220,8 @@ class MarkdownShortcuts {
             this.onTriggers()
           } else if (delta.ops[i].insert === '\n') {
             this.onEnter()
+          } else if (delta.ops[i].hasOwnProperty('delete') && source === 'user') {
+            this.onDelete()
           }
         }
       }
@@ -250,9 +246,10 @@ class MarkdownShortcuts {
       for (let match of this.matches) {
         const matchedText = text.match(match.pattern)
         if (matchedText) {
-          const emojisFound = text.match(this.regexEmojis);
+          const emojisFound = text.match(this.emojisRegex()) || [];
+          // console.log({emojisFound})
           // We need to replace only matched text not the whole line
-          match.action(text, selection, match.pattern, lineStart, emojisFound.length)
+          match.action(text, selection, match.pattern, lineStart, emojisFound.length);
           return
         }
       }
@@ -270,11 +267,46 @@ class MarkdownShortcuts {
       for (let match of this.matches) {
         const matchedText = text.match(match.pattern)
         if (matchedText) {
-          match.action(text, selection, match.pattern, lineStart)
+          // const emojisFound = text.match(this.emojisRegex()) || [];
+          const emojisFound = [];
+          
+          match.action(text, selection, match.pattern, lineStart, emojisFound.length);
           return
         }
       }
     }
+  }
+
+  onDelete () {
+    const range = this.quill.getSelection();
+    
+    if (!range) {
+      return
+    }
+
+    const format = this.quill.getFormat(range)
+
+    if (format.blockquote || format.code || format['code-block']) {
+      if (this.isLastBrElement(range) || this.isEmptyLine(range)) {
+        this.quill.removeFormat(range.index, range.length);
+      }
+    }
+  }
+
+  isLastBrElement (range) {
+    const [block] = this.quill.scroll.descendant(Block, range.index)
+    const isBrElement = block != null && block.domNode.firstChild instanceof HTMLBRElement
+    return isBrElement 
+  }
+
+  isEmptyLine (range) {
+    const [line] = this.quill.getLine(range.index)
+    const isEmpty = line.children.head.text.trim() === ""
+    return isEmpty
+  }
+
+  emojisRegex () {
+    return /[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}]/ug
   }
 }
 
