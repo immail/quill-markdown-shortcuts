@@ -52,7 +52,7 @@
       },
       {
         name: 'short_italic',
-        pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/g,
+        pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/gu,
         action: (text, selection, pattern, lineStart, emojisLength = 0) => {
           let match = pattern.exec(text)
 
@@ -71,7 +71,7 @@
       },
       {
         name: 'short_strikethrough',
-        pattern: /(?:~)(.+?)(?:~)/g,
+        pattern:/(?:\~){1}(.+?)(?:\~){1}/gu,
         action: (text, selection, pattern, lineStart, emojisLength = 0) => {
           let match = pattern.exec(text)
 
@@ -134,7 +134,7 @@
       },
       {
         name: 'strikethrough',
-        pattern: /(?:~~)(.+?)(?:~~)/g,
+        pattern: /(?:\~){2}(.+?)(?:\~){2}/g,
         action: (text, selection, pattern, lineStart,  emojisLength = 0) => {
           let match = pattern.exec(text)
 
